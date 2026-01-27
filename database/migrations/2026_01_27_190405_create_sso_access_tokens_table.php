@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('client_id')->nullable(false);
             $table->string('user_id', 255)->nullable();
             $table->text('scopes')->nullable();
-            $table->tinyInteger('revoked')->nullable();
+            $table->tinyInteger('revoked')->default(0)->nullable(false);
             $table->dateTime('expires_at')->nullable();
             $table->timestamps();
             

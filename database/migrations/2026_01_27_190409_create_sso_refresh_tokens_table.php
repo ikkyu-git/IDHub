@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('sso_refresh_tokens', function (Blueprint $table) {
             $table->string('id', 255)->primary();
             $table->string('access_token_id', 255)->nullable();
-            $table->tinyInteger('revoked')->nullable();
+            $table->tinyInteger('revoked')->default(0)->nullable(false);
             $table->dateTime('expires_at')->nullable();
             $table->timestamps();
             

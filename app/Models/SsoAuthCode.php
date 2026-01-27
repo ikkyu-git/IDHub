@@ -19,5 +19,5 @@ class SsoAuthCode extends Model
         'code_challenge',
         'code_challenge_method',
     ];
-    protected $casts = ['expires_at' => 'datetime'];
+    protected $casts = ['expires_at' => 'datetime', 'revoked' => 'boolean'];
 }
