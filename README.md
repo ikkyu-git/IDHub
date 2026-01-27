@@ -1,33 +1,67 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# IDHub - Identity & SSO Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+NextAuth SSO System - ระบบจัดการผู้ใช้และ Single Sign-On
 
-## About Laravel
+## คุณสมบัติ
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- 🔐 **ระบบ Authentication** - Login, Register, Email Verification
+- 👥 **การจัดการผู้ใช้** - CRUD Users, Roles & Permissions
+- 🔑 **SSO Server** - OAuth 2.0 & OpenID Connect Support
+- 📱 **Two-Factor Authentication** - 2FA with TOTP
+- 📧 **Email Notifications** - ส่งอีเมลยืนยันและแจ้งเตือน
+- 📊 **Audit Logs** - บันทึกการใช้งานระบบ
+- 🎨 **Admin Dashboard** - หน้าจัดการระบบสำหรับ Admin
+- 🔒 **Security Features** - Password History, Force Password Change, Account Suspension
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ความต้องการของระบบ
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+
+- Composer
+- Node.js & NPM
+- SQLite (หรือ MySQL/PostgreSQL)
 
-## Learning Laravel
+## การติดตั้ง
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+# Clone repository
+git clone https://github.com/ikkyu-git/IDHub.git
+cd IDHub
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+# ติดตั้ง dependencies
+composer install
+npm install
 
-## Laravel Sponsors
+# ตั้งค่า environment
+cp .env.example .env
+php artisan key:generate
+
+# สร้าง database
+touch database/database.sqlite
+
+# Run migrations
+php artisan migrate
+
+# Build assets
+npm run build
+
+# Run development server
+php artisan serve
+```
+
+## การใช้งาน
+
+1. เข้าไปที่ `http://localhost:8000`
+2. สร้าง Super Admin ที่ `/setup/admin`
+3. เข้าสู่ระบบและเริ่มใช้งาน
+
+## คู่มือการติดตั้งบน Production Server
+
+ดูรายละเอียดได้ที่ [DEPLOYMENT.md](DEPLOYMENT.md)
+
+## License
+
+Open-sourced software licensed under the MIT license.
+
 
 We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
@@ -57,3 +91,7 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+<<<<<<< HEAD
+=======
+"# IDHub" 
+>>>>>>> d66ffaac01d3989caabcf2834892fa06ed767c3f
