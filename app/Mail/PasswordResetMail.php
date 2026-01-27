@@ -7,7 +7,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class VerifyEmail extends Mailable implements ShouldQueue
+class PasswordResetMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -22,8 +22,8 @@ class VerifyEmail extends Mailable implements ShouldQueue
 
     public function build()
     {
-        return $this->subject('ยืนยันอีเมลของคุณ')
-                    ->view('emails.verify-email')
+        return $this->subject('Reset your password')
+                    ->view('emails.password-reset')
                     ->with(['user' => $this->user, 'url' => $this->url]);
     }
 }

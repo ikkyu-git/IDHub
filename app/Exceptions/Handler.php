@@ -47,6 +47,14 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             $this->logWithContext($e);
+            // Send to Sentry if available and DSN configured
+            try {
+                if (env('SENTRY_DSN') && function_exists('\\Sentry\\captureException')) {
+                    \\Sentry\\captureException($e);
+                }
+            } catch (\Throwable $ex) {
+                // ignore Sentry failures
+            }
         });
     }
 

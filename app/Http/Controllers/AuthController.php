@@ -316,11 +316,29 @@ class AuthController extends Controller
     {
         $request->validate(['email' => ['required','email']]);
 
-        $status = Password::sendResetLink($request->only('email'));
+        $email = $request->input('email');
+        $user = User::where('email', $email)->first();
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with('alert', __($status))
-            : back()->withErrors(['email' => __($status)]);
+        if (!$user) {
+            // Do not reveal missing emails; behave like link sent
+            return back()->with('alert', 'หากอีเมลมีอยู่ในระบบ เราได้ส่งลิงก์รีเซ็ตให้แล้ว');
+        }
+
+        // Create a reset token and send via our mailable
+        $token = Password::broker()->createToken($user);
+        $resetUrl = url('/password/reset/' . $token . '?email=' . urlencode($user->email));
+
+        try {
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\PasswordResetMail($user, $resetUrl));
+        } catch (\Throwable $e) {
+            // fallback to framework default
+            $status = Password::sendResetLink($request->only('email'));
+            return $status === Password::RESET_LINK_SENT
+                ? back()->with('alert', __($status))
+                : back()->withErrors(['email' => __($status)]);
+        }
+
+        return back()->with('alert', 'หากอีเมลมีอยู่ในระบบ เราได้ส่งลิงก์รีเซ็ตให้แล้ว');
     }
 
     public function showResetForm(Request $request, $token = null)
@@ -342,7 +360,7 @@ class AuthController extends Controller
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
                 $user->forceFill([
-                    'password' => Hash::make($password)
+                    'password' => Hash::make($password),
                 ])->setRememberToken(Str::random(60));
 
                 $user->save();
