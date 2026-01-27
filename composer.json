@@ -25,6 +25,7 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
+        "nunomaduro/larastan": "^3.9",
         "pestphp/pest": "^4.3",
         "pestphp/pest-plugin-laravel": "^4.0"
     },
@@ -56,6 +57,15 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
+        ],
+        "lint": [
+            "@php vendor/bin/pint --config=pint.json"
+        ],
+        "phpstan": [
+            "@php vendor/bin/phpstan analyse -c phpstan.neon"
+        ],
+        "coverage": [
+            "@php artisan test --coverage --parallel"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
