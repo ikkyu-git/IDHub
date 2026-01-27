@@ -15,10 +15,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'oauth/token',
         ]);
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\ForcePasswordChange::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\CheckUserActive::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\EnsureAdminTwoFactor::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->reportable(function (\Throwable $e) {
+            if (app()->bound('sentry')) {
+                app('sentry')->captureException($e);
+            }
+        });
     })->create();

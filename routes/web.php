@@ -17,13 +17,13 @@ Route::middleware([LogGlobalActivity::class])->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.page');
     // Registration (public) - enabled only if allowed in settings
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register.page');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1')->name('register.submit');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1')->name('login.submit');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::view('/forgot-password', 'auth.forgot')->name('forgot.page');
-    Route::post('/forgot-password', [AuthController::class, 'sendReset'])->name('forgot.submit');
+    Route::post('/forgot-password', [AuthController::class, 'sendReset'])->middleware('throttle:3,1')->name('forgot.submit');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1')->name('password.update');
     Route::view('/setup/admin', 'auth.setup-admin')->name('setup.admin.page');
     Route::post('/setup/admin', [AuthController::class, 'createFirstAdmin'])->name('setup.admin.submit');
 

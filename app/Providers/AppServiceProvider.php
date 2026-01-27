@@ -37,6 +37,16 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Rate limiting for authentication endpoints
+        RateLimiter::for('auth', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
+        // Stricter rate limiting for password reset
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perMinute(3)->by($request->ip());
+        });
+
         // Load Social Login Settings from DB
         try {
             if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
