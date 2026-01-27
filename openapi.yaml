@@ -1,0 +1,54 @@
+openapi: 3.0.3
+info:
+  title: ID Hub API
+  version: "1.0.0"
+  description: OpenAPI spec for the ID Hub authentication and SSO API
+servers:
+  - url: /
+paths:
+  /oauth/authorize:
+    get:
+      summary: Authorization endpoint (OIDC)
+      parameters:
+        - name: response_type
+          in: query
+          schema:
+            type: string
+        - name: client_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to login/consent
+  /oauth/token:
+    post:
+      summary: Token endpoint
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Token response
+  /oauth/userinfo:
+    get:
+      summary: Userinfo endpoint
+      responses:
+        '200':
+          description: User profile
+  /health:
+    get:
+      summary: Liveness check
+      responses:
+        '200':
+          description: OK
+  /health/ready:
+    get:
+      summary: Readiness check
+      responses:
+        '200':
+          description: Ready
+components: {}

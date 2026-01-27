@@ -13,6 +13,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage; // ต้องมีบรรทัดนี้
 
+/**
+ * App\Models\User
+ *
+ * @property string|null $first_name
+ * @property string|null $last_name
+ * @property string|null $username
+ * @property array|null $attributes
+ * @property bool $is_active
+ * @property bool $must_change_password
+ * @property \Illuminate\Support\Carbon|null $password_changed_at
+ * @property \Illuminate\Support\Carbon|null $last_login_at
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -53,22 +65,22 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
-     * @return array<string, string>
+     * @var array<string,string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_admin' => 'boolean', // เพิ่มบรรทัดนี้
-            'is_active' => 'boolean',
-            'last_login_at' => 'datetime',
-            'two_factor_confirmed_at' => 'datetime',
-            'attributes' => 'array', // Cast JSON to Array
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_admin' => 'boolean',
+        'is_active' => 'boolean',
+        'last_login_at' => 'datetime',
+        'password_changed_at' => 'datetime',
+        'two_factor_confirmed_at' => 'datetime',
+        'attributes' => 'array',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     // Return a friendly full name (first + last) or fallback to name column
     public function getFullNameAttribute()

@@ -1,3 +1,13 @@
+@component('emails.layout', ['title' => 'Verify your email'])
+<p>สวัสดี {{ $user->name ?? 'ผู้ใช้' }},</p>
+
+<p>กรุณายืนยันอีเมลของคุณโดยคลิกปุ่มด้านล่าง:</p>
+
+<p style="text-align:center;"><a class="cta" href="{{ $url }}">ยืนยันอีเมล</a></p>
+
+<p>หากไม่ได้สร้างบัญชีนี้ โปรดเพิกเฉยอีเมลนี้</p>
+
+@endcomponent
 <!doctype html>
 <html>
 <head>

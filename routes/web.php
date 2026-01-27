@@ -59,6 +59,24 @@ Route::middleware([LogGlobalActivity::class])->group(function () {
     // 3. จุดดึงข้อมูลผู้ใช้ (User Info Endpoint) - API
     Route::middleware('throttle:sso-api')->get('/api/user', [SimpleSsoController::class, 'userInfo'])->name('oauth.userinfo');
 
+    // Serve OpenAPI spec and Swagger UI
+    Route::get('/openapi.yaml', function () {
+        $path = base_path('openapi.yaml');
+        if (!file_exists($path)) {
+            abort(404);
+        }
+        return response()->make(file_get_contents($path), 200, ['Content-Type' => 'application/x-yaml']);
+    })->name('openapi.spec')->middleware(\App\Http\Middleware\RequireDocsAuth::class);
+
+    Route::get('/api/docs', function () {
+        return view('swagger');
+    })->name('api.docs')->middleware(\App\Http\Middleware\RequireDocsAuth::class);
+
+    // Health & metrics endpoints
+    Route::get('/health', [App\Http\Controllers\HealthController::class, 'liveness'])->name('health.liveness');
+    Route::get('/health/ready', [App\Http\Controllers\HealthController::class, 'readiness'])->name('health.readiness');
+    Route::get('/metrics', [App\Http\Controllers\HealthController::class, 'metrics'])->name('metrics')->middleware(\App\Http\Middleware\RequireDocsAuth::class);
+
     // 4. Developer Documentation (Restricted to Client Managers)
     Route::get('/developers', function () {
         if (!Auth::check() || !Auth::user()->hasPermission('manage_clients')) {

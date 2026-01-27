@@ -433,6 +433,10 @@ class SimpleSsoController extends Controller
 
         // Generate OIDC ID Token (JWT)
         $user = \App\Models\User::find($userId);
+        if (!$user) {
+            abort(404, 'User not found');
+        }
+
         $payload = [
             'iss' => url('/'),
             'sub' => (string) $user->id,
@@ -442,12 +446,8 @@ class SimpleSsoController extends Controller
             'exp' => time() + 3600,
         ];
 
-        // Add auth_time if available
-        if ($user->last_login_at) {
-            $payload['auth_time'] = $user->last_login_at->getTimestamp();
-        } else {
-            $payload['auth_time'] = time();
-        }
+        // Add auth_time if available — prefer model casts otherwise use current time
+        $payload['auth_time'] = optional($user->last_login_at)->getTimestamp() ?: time();
 
         // Add at_hash
         $atHash = substr(hash('sha256', $accessTokenId, true), 0, 16);
@@ -472,8 +472,9 @@ class SimpleSsoController extends Controller
             $payload['first_name'] = $user->first_name;
             $payload['last_name'] = $user->last_name;
             $payload['username'] = $user->username;
-            $payload['updated_at'] = $user->updated_at ? $user->updated_at->getTimestamp() : time();
-            if ($user->avatar_url) {
+            $payload['updated_at'] = optional($user->updated_at)->getTimestamp() ?: time();
+
+            if (!empty($user->avatar_url) && is_string($user->avatar_url)) {
                 $payload['picture'] = asset($user->avatar_url);
             }
         }
@@ -488,9 +489,9 @@ class SimpleSsoController extends Controller
         }
 
         // Custom Attributes Mapping for ID Token
-        if ($user->attributes) {
+        if (is_iterable($user->attributes)) {
             foreach ($user->attributes as $key => $value) {
-                if (in_array($key, $scopesArray)) {
+                if (in_array($key, $scopesArray, true)) {
                     $payload[$key] = $value;
                 }
             }

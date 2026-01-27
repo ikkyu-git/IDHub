@@ -25,7 +25,7 @@ test('user can register and receives verification email', function () {
 
     $response->assertRedirect(route('user.dashboard'));
     $this->assertDatabaseHas('users', ['email' => 'jane@example.com', 'is_active' => 1]);
-    Mail::assertSent(VerifyEmail::class, function ($mail) {
+    Mail::assertQueued(VerifyEmail::class, function ($mail) {
         return $mail->hasTo('jane@example.com');
     });
 });

@@ -121,6 +121,21 @@ return [
             'processors' => [PsrLogMessageProcessor::class],
         ],
 
+        'sentry' => [
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'error'),
+            'handler' => \Sentry\Monolog\Handler::class,
+            'handler_with' => [],
+        ],
+
+        'json' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/laravel.json.log'),
+            'level' => env('LOG_LEVEL', 'info'),
+            'days' => 14,
+            'tap' => [\App\Logging\CustomizeJsonFormatter::class],
+        ],
+
         'syslog' => [
             'driver' => 'syslog',
             'level' => env('LOG_LEVEL', 'debug'),
