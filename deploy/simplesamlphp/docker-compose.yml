@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  idp:
+    image: "simplesamlphp/simplesamlphp:1.19"
+    container_name: idhub-simplesamlphp-idp
+    ports:
+      - "8081:80" # expose HTTP for testing; use reverse-proxy & TLS in production
+    volumes:
+      - ./config:/var/simplesamlphp/config:ro
+      - ./metadata:/var/simplesamlphp/metadata:ro
+      - ./cert:/var/simplesamlphp/cert:ro
+      - ./modules:/var/simplesamlphp/modules:ro
+    environment:
+      - SIMPLESAMLPHP_ADMIN_PASSWORD=changeme
+    restart: unless-stopped
