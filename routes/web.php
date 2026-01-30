@@ -67,6 +67,11 @@ Route::middleware([LogGlobalActivity::class])->group(function () {
         return view('developer.index');
     })->middleware(['web', 'auth'])->name('developer.docs');
 
+    // SAML IdP endpoints (minimal)
+    Route::get('/saml/metadata', [App\Http\Controllers\SamlController::class, 'metadata'])->name('saml.metadata');
+    Route::get('/saml/login', [App\Http\Controllers\SamlController::class, 'login'])->name('saml.login');
+    Route::post('/saml/acs', [App\Http\Controllers\SamlController::class, 'acs'])->name('saml.acs');
+
 
     // เส้นทางที่ต้องยืนยันตัวตน (Protected Routes)
     Route::middleware(['web', 'auth'])->group(function () {
