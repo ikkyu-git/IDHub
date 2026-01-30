@@ -119,6 +119,54 @@ class SamlController extends BaseController
         $responseXml .= '</saml:Assertion>';
         $responseXml .= '</samlp:Response>';
 
+        // Try to sign the Assertion if keys are available
+        $signed = false;
+        try {
+            $privateKey = config('saml.private_key_path');
+            $publicCert = config('saml.certificate_path');
+
+            if (file_exists($privateKey) && file_exists($publicCert)) {
+                $doc = new \DOMDocument();
+                $doc->loadXML($responseXml);
+
+                // Find the Assertion node
+                $assertions = $doc->getElementsByTagName('Assertion');
+                if ($assertions->length > 0) {
+                    $assertion = $assertions->item(0);
+
+                    // Sign the Assertion using xmlseclibs
+                    $objDSig = new \RobRichards\XMLSecLibs\XMLSecurityDSig();
+                    $objDSig->setCanonicalMethod(\RobRichards\XMLSecLibs\XMLSecurityDSig::EXC_C14N);
+                    $objDSig->addReference(
+                        $assertion,
+                        \RobRichards\XMLSecLibs\XMLSecurityDSig::SHA256,
+                        array('http://www.w3.org/2000/09/xmldsig#enveloped-signature')
+                    );
+
+                    $objKey = new \RobRichards\XMLSecLibs\XMLSecurityKey(\RobRichards\XMLSecLibs\XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
+                    $objKey->loadKey($privateKey, true);
+
+                    $objDSig->sign($objKey);
+
+                    $certData = file_get_contents($publicCert);
+                    $certData = preg_replace('/-----BEGIN CERTIFICATE-----/', '', $certData);
+                    $certData = preg_replace('/-----END CERTIFICATE-----/', '', $certData);
+                    $certData = trim(str_replace(array("\r", "\n"), '', $certData));
+
+                    $objDSig->add509Cert($certData);
+
+                    // Append signature to Assertion
+                    $objDSig->appendSignature($assertion);
+
+                    $responseXml = $doc->saveXML();
+                    $signed = true;
+                }
+            }
+        } catch (\Exception $e) {
+            // fallback to unsigned response on error
+            $signed = false;
+        }
+
         $b64 = base64_encode($responseXml);
 
         // Return an auto-posting form to the SP ACS URL
@@ -127,6 +175,9 @@ class SamlController extends BaseController
         $form .= '<input type="hidden" name="SAMLResponse" value="' . htmlspecialchars($b64, ENT_QUOTES, 'UTF-8') . '" />';
         if ($request->has('RelayState')) {
             $form .= '<input type="hidden" name="RelayState" value="' . htmlspecialchars($request->input('RelayState'), ENT_QUOTES, 'UTF-8') . '" />';
+        }
+        if (!$signed) {
+            $form .= '<!-- WARNING: Response unsigned (keys not configured) -->';
         }
         $form .= '<noscript><button type="submit">Continue</button></noscript>';
         $form .= '</form></body></html>';
