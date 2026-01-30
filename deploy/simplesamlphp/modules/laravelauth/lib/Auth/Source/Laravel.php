@@ -32,55 +32,43 @@ class SimpleSAML_Auth_Source_Laravel extends SimpleSAML_Auth_Source
             exit();
         }
 
-        // Bootstrap Laravel by locating vendor/autoload.php and bootstrap/app.php
-        $laravelBase = $this->findLaravelBase(dirname(__DIR__, 6));
-        if (!$laravelBase) {
-            $this->error('Could not find Laravel application to bootstrap (vendor/autoload.php).');
+        // For production: call internal Laravel REST endpoint instead of bootstrapping
+        $authUrl = $this->config['auth_url'] ?? 'http://localhost/internal/saml/auth';
+        $internalToken = $this->config['internal_token'] ?? 'CHANGE_ME_INTERNAL_TOKEN';
+
+        $payload = json_encode([
+            'username' => $username,
+            'password' => $password,
+        ]);
+
+        $ch = curl_init($authUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'X-Internal-Token: ' . $internalToken,
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+
+        $resp = curl_exec($ch);
+        $err = curl_error($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($err || $code !== 200) {
+            $this->renderLoginFormWithError('Authentication service unavailable');
+            exit();
         }
 
-        require $laravelBase . '/vendor/autoload.php';
-        $app = require $laravelBase . '/bootstrap/app.php';
-        $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
-        $kernel->bootstrap();
-
-        // Use the User model to find and validate the user
-        try {
-            $userModel = \App\Models\User::where('email', $username)->orWhere('username', $username)->first();
-            if (!$userModel) {
-                $this->renderLoginFormWithError('Invalid credentials');
-                exit();
-            }
-
-            // Laravel hashes are compatible with password_verify for bcrypt
-            if (!password_verify($password, $userModel->password)) {
-                $this->renderLoginFormWithError('Invalid credentials');
-                exit();
-            }
-
-            // Build attributes to return to SP
-            $attributes = array();
-            $attributes['uid'] = array((string) $userModel->id);
-            $attributes['email'] = array($userModel->email);
-            $attributes['displayName'] = array($userModel->name ?? '');
-            $attributes['givenName'] = array($userModel->first_name ?? '');
-            $attributes['sn'] = array($userModel->last_name ?? '');
-
-            // Roles (if relationship exists)
-            try {
-                if (method_exists($userModel, 'roles')) {
-                    $roles = $userModel->roles->pluck('slug')->toArray();
-                    $attributes['roles'] = $roles;
-                }
-            } catch (\Exception $e) {
-                // ignore roles mapping failures
-            }
-
-            // Successful authentication - set attributes in state
-            $state['Attributes'] = $attributes;
-            return;
-        } catch (\Exception $e) {
-            $this->error('Authentication error: ' . $e->getMessage());
+        $data = json_decode($resp, true);
+        if (!is_array($data) || empty($data['ok']) || empty($data['attributes'])) {
+            $this->renderLoginFormWithError('Invalid credentials');
+            exit();
         }
+
+        $state['Attributes'] = $data['attributes'];
+        return;
     }
 
     private function findLaravelBase($start)

@@ -72,6 +72,9 @@ Route::middleware([LogGlobalActivity::class])->group(function () {
     Route::get('/saml/login', [App\Http\Controllers\SamlController::class, 'login'])->name('saml.login');
     Route::post('/saml/acs', [App\Http\Controllers\SamlController::class, 'acs'])->name('saml.acs');
 
+    // Internal endpoint used by IdP service to validate credentials (use X-Internal-Token header)
+    Route::post('/internal/saml/auth', [App\Http\Controllers\InternalSamlController::class, 'authenticate'])->name('internal.saml.auth');
+
 
     // เส้นทางที่ต้องยืนยันตัวตน (Protected Routes)
     Route::middleware(['web', 'auth'])->group(function () {
